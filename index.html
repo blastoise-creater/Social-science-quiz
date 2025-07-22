@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Science Quiz</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .question-section {
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 20px;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-button {
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            border: none;
+            outline: none;
+        }
+        .option-button:hover {
+            background-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        .option-button.selected {
+            background-color: #94a3b8;
+            color: #ffffff;
+        }
+        .option-button.correct {
+            background-color: #22c55e; /* Green for correct */
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .option-button.incorrect {
+            background-color: #ef4444; /* Red for incorrect */
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #4f46e5;
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            outline: none;
+        }
+        .nav-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .feedback-message {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-height: 25px; /* To prevent layout shift */
+        }
+        .feedback-correct {
+            color: #22c55e;
+        }
+        .feedback-incorrect {
+            color: #ef4444;
+        }
+        .theme-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Social Science Quiz</h1>
+
+        <div class="theme-title" id="theme-title"></div>
+
+        <div class="question-section">
+            <p class="question-text" id="question-text"></p>
+            <div class="options-container" id="options-container">
+                <!-- Options will be loaded here by JavaScript -->
+            </div>
+            <div class="feedback-message" id="feedback-message"></div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button id="prev-button" class="nav-button" disabled>Previous</button>
+            <button id="next-button" class="nav-button">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data structure
+        const quizData = [
+            {
+                theme: "Agriculture and Soils",
+                questions: [
+                    {
+                        question: "Which of the following crops is a Rabi crop?",
+                        options: ["Bajra", "Wheat", "Maize", "Cotton"],
+                        answer: "Wheat"
+                    },
+                    {
+                        question: "The soil type most suitable for growing cotton is",
+                        options: ["black", "red", "sandy", "laterite"],
+                        answer: "black"
+                    },
+                    {
+                        question: "The Green Revolution in India mainly focused on which type of crop?",
+                        options: ["Pulses", "Fruits", "Food grains", "Spices"],
+                        answer: "Food grains"
+                    }
+                ]
+            },
+            {
+                theme: "Human Resources",
+                questions: [
+                    {
+                        question: "Which of the following is the most important resource for a country's development?",
+                        options: ["Land", "Water", "Human resources", "Minerals"],
+                        answer: "Human resources"
+                    },
+                    {
+                        question: "Which factor does NOT affect population distribution?",
+                        options: ["Climate", "Landforms", "Internet speed", "Availability of resources"],
+                        answer: "Internet speed"
+                    },
+                    {
+                        question: "What is the main reason for high population growth in developing countries?",
+                        options: ["High death rate", "Low birth rate", "Improved healthcare and sanitation", "Lack of education"],
+                        answer: "Improved healthcare and sanitation"
+                    }
+                ]
+            },
+            {
+                theme: "Types of Government (Monarchy, Dictatorship, Oligarchy, Theocracy, and Democracy)",
+                questions: [
+                    {
+                        question: "Citizens vote for their leaders and have equal rights",
+                        options: ["(a) Oligarchy", "(b) Dictatorship", "(c) Monarchy", "(d) Democracy", "(e) Theocracy"],
+                        answer: "(d) Democracy"
+                    },
+                    {
+                        question: "Religious leaders govern based on religious laws",
+                        options: ["(a) Oligarchy", "(b) Dictatorship", "(c) Monarchy", "(d) Democracy", "(e) Theocracy"],
+                        answer: "(e) Theocracy"
+                    },
+                    {
+                        question: "A small group of wealthy or influential people rule",
+                        options: ["(a) Oligarchy", "(b) Dictatorship", "(c) Monarchy", "(d) Democracy", "(e) Theocracy"],
+                        answer: "(a) Oligarchy"
+                    },
+                    {
+                        question: "One person holds all power and often gains it through force",
+                        options: ["(a) Oligarchy", "(b) Dictatorship", "(c) Monarchy", "(d) Democracy", "(e) Theocracy"],
+                        answer: "(b) Dictatorship"
+                    },
+                    {
+                        question: "Power is inherited and held by a king or queen",
+                        options: ["(a) Oligarchy", "(b) Dictatorship", "(c) Monarchy", "(d) Democracy", "(e) Theocracy"],
+                        answer: "(c) Monarchy"
+                    }
+                ]
+            },
+            {
+                theme: "Introduction to Constitution of India (Brief Overview of Constitution making, Preamble, Fundamental Rights and Duties)",
+                questions: [
+                    {
+                        question: "Example: A child goes to school regardless of their background",
+                        options: ["(a) Right to Freedom of Speech and Expression", "(b) Right to Freedom of Religion", "(c) Right to Equality", "(d) Right Against Exploitation"],
+                        answer: "(c) Right to Equality"
+                    },
+                    {
+                        question: "A person speaks freely about an issue without fear.",
+                        options: ["(a) Right to Freedom of Speech and Expression", "(b) Right to Freedom of Religion", "(c) Right to Equality", "(d) Right Against Exploitation"],
+                        answer: "(a) Right to Freedom of Speech and Expression"
+                    },
+                    {
+                        question: "A child is prohibited to work in factories",
+                        options: ["(a) Right to Freedom of Speech and Expression", "(b) Right to Freedom of Religion", "(c) Right to Equality", "(d) Right Against Exploitation"],
+                        answer: "(d) Right Against Exploitation"
+                    },
+                    {
+                        question: "A person follows their religion without anyone stopping them",
+                        options: ["(a) Right to Freedom of Speech and Expression", "(b) Right to Freedom of Religion", "(c) Right to Equality", "(d) Right Against Exploitation"],
+                        answer: "(b) Right to Freedom of Religion"
+                    }
+                ]
+            },
+            {
+                theme: "Role of Government in Providing Public Facility",
+                questions: [
+                    {
+                        question: "Which of the following is NOT considered a public facility?",
+                        options: ["Water supply", "Electricity", "Private cars", "Public transport"],
+                        answer: "Private cars"
+                    },
+                    {
+                        question: "Which article of the Indian Constitution includes the right to water?",
+                        options: ["Article 14", "Article 21", "Article 32", "Article 44"],
+                        answer: "Article 21"
+                    },
+                    {
+                        question: "What is the primary source of government funding for public facilities?",
+                        options: ["Donations", "Loans", "Taxes", "Foreign aid"],
+                        answer: "Taxes"
+                    }
+                ]
+            },
+            {
+                theme: "Law and Social Justice",
+                questions: [
+                    {
+                        question: "Why are worker laws necessary?",
+                        options: ["To ensure fair wages and safe working conditions", "To allow companies to decide their own worker policies", "To increase competition among workers", "To encourage child worker in industries"],
+                        answer: "To ensure fair wages and safe working conditions"
+                    },
+                    {
+                        question: "What was the main cause of the Bhopal Gas Tragedy?",
+                        options: ["A natural disaster", "A chemical leak due to poor safety measures", "A workers' protest", "A government shutdown"],
+                        answer: "A chemical leak due to poor safety measures"
+                    },
+                    {
+                        question: "Which Fundamental Right is linked to workplace safety and fair wages?",
+                        options: ["Right to Freedom", "Right to Equality", "Right to Life (Article 21)", "Right to Education"],
+                        answer: "Right to Life (Article 21)"
+                    }
+                ]
+            },
+            {
+                theme: "Survey of Local Historical Places",
+                questions: [
+                    {
+                        question: '"Golden Temple" is located in which city of India?',
+                        options: ["Amritsar", "Ujjain", "Varanasi", "Mathura"],
+                        answer: "Amritsar"
+                    },
+                    {
+                        question: "The Gwalior fort is located in which Indian state?",
+                        options: ["Odisha", "West Bengal", "Madhya Pradesh", "Gujarat"],
+                        answer: "Madhya Pradesh"
+                    },
+                    {
+                        question: "Which River is the Kashi Vishwanath Temple located nearby?",
+                        options: ["Ganga", "Yamuna", "Sarasvati", "Godavari"],
+                        answer: "Ganga"
+                    }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let currentThemeIndex = 0;
+        let selectedAnswer = null;
+        let quizCompleted = false; // Flag to track if the quiz is completed
+
+        const themeTitleElement = document.getElementById('theme-title');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+
+        // Function to load a question
+        function loadQuestion() {
+            // Clear previous feedback and selections
+            feedbackMessage.textContent = '';
+            feedbackMessage.className = 'feedback-message';
+            selectedAnswer = null;
+
+            // Get the current theme and question
+            const currentTheme = quizData[currentThemeIndex];
+            const currentQuestion = currentTheme.questions[currentQuestionIndex];
+
+            // Update theme title
+            themeTitleElement.textContent = `Theme: ${currentTheme.theme}`;
+
+            // Update question text
+            questionTextElement.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+
+            // Create and append option buttons
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option-button');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.answer));
+                optionsContainer.appendChild(button);
+            });
+
+            // Update navigation button states
+            updateNavigationButtons();
+        }
+
+        // Function to handle answer selection
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            // If an answer has already been selected or quiz is completed, do nothing
+            if (selectedAnswer !== null || quizCompleted) {
+                return;
+            }
+
+            selectedAnswer = selectedOption;
+
+            // Remove 'selected' class from all options and then add to the clicked one
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'incorrect');
+                btn.disabled = true; // Disable all options after selection
+            });
+            button.classList.add('selected');
+
+            // Provide feedback
+            if (selectedOption === correctAnswer) {
+                feedbackMessage.textContent = 'Correct!';
+                feedbackMessage.classList.add('feedback-correct');
+                button.classList.add('correct');
+            } else {
+                feedbackMessage.textContent = `Incorrect. The correct answer was: ${correctAnswer}`;
+                feedbackMessage.classList.add('feedback-incorrect');
+                button.classList.add('incorrect');
+                // Highlight the correct answer if the selected one was incorrect
+                Array.from(optionsContainer.children).forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+        }
+
+        // Function to update navigation button states
+        function updateNavigationButtons() {
+            // Disable previous button if on the first question of the first theme
+            prevButton.disabled = (currentThemeIndex === 0 && currentQuestionIndex === 0);
+
+            // Disable next button if on the last question of the last theme
+            const lastThemeIndex = quizData.length - 1;
+            const lastQuestionIndexInLastTheme = quizData[lastThemeIndex].questions.length - 1;
+            nextButton.disabled = (currentThemeIndex === lastThemeIndex && currentQuestionIndex === lastQuestionIndexInLastTheme);
+        }
+
+        // Event listener for Next button
+        nextButton.addEventListener('click', () => {
+            // Move to the next question or next theme
+            const currentTheme = quizData[currentThemeIndex];
+            if (currentQuestionIndex < currentTheme.questions.length - 1) {
+                currentQuestionIndex++;
+            } else if (currentThemeIndex < quizData.length - 1) {
+                currentThemeIndex++;
+                currentQuestionIndex = 0; // Reset question index for the new theme
+            } else {
+                // Quiz completed
+                quizCompleted = true;
+                questionTextElement.textContent = "Quiz Completed!";
+                optionsContainer.innerHTML = '';
+                feedbackMessage.textContent = "You have finished the quiz.";
+                feedbackMessage.classList.add('feedback-correct'); // Or a neutral color
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+                themeTitleElement.textContent = '';
+                return;
+            }
+            loadQuestion();
+        });
+
+        // Event listener for Previous button
+        prevButton.addEventListener('click', () => {
+            // Move to the previous question or previous theme
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+            } else if (currentThemeIndex > 0) {
+                currentThemeIndex--;
+                // Set to the last question of the previous theme
+                currentQuestionIndex = quizData[currentThemeIndex].questions.length - 1;
+            }
+            quizCompleted = false; // If navigating back, quiz is no longer "completed"
+            loadQuestion();
+        });
+
+        // Initial load of the first question
+        loadQuestion();
+    </script>
+
+</body>
+</html>
+
